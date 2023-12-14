@@ -1,0 +1,19 @@
+<footer class="navbar-light bg-light fixed-bottom">
+  <div class="flex-space-between">
+    <ng-container *ngIf="showPreviousButton(); else placeholder">
+      <a class="btn custom-btn" [routerLink]="getPreviousPageLink()">{{
+        getPreviousPageName()
+      }}</a>
+    </ng-container>
+
+    <ng-container *ngIf="showNextButton(); else placeholder">
+      <a class="btn custom-btn" [routerLink]="getNextPageLink()">{{
+        getNextPageName()
+      }}</a>
+    </ng-container>
+
+    <ng-template #placeholder>
+      <div style="width: 100px"></div>
+    </ng-template>
+  </div>
+</footer>

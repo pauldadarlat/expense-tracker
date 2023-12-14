@@ -1,0 +1,49 @@
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Expenses for {{ selectedDay$ | async }}</h5>
+    <div *ngIf="expenseList.length > 0; else noExpenses">
+      <ul>
+        <li *ngFor="let expense of expenseList" class="expense-box list-unstyled">
+          <div class="flex-space-between">
+            {{ formatDate(expense.date) }} - {{ expense.category }} -
+            {{ expense.amount }}
+            <div class="expense-actions">
+              <button
+                class="custom-btn btn btn-warning"
+                (click)="openEditExpense(expense)"
+              >
+                <i class="fas fa-pencil-alt"></i> Edit
+              </button>
+              <button
+                class="custom-btn btn btn-danger"
+                (click)="deleteExpense(expense)"
+              >
+                <i class="fas fa-trash-alt"></i> Delete
+              </button>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </div>
+
+    <ng-template #noExpenses>
+      <p>No expenses for {{ selectedDay$ | async }}.</p>
+    </ng-template>
+
+    <div class="flex-space-between">
+      <button class="btn btn-primary mt-3" (click)="openExpenseItemForm()">
+        Add Expense
+      </button>
+      <p>Daily Expenses: {{ dailyExpensesTotal$ | async }}</p>
+    </div>
+    <div class="mt-5">
+      <app-expense-item
+      *ngIf="showExpenseItemForm"
+        [expenseItem]="selectedExpense"
+        (saveExpenseItem)="onSaveNewExpenseItem($event)"
+        (cancel)="closeExpenseItemForm()"
+      ></app-expense-item>
+    </div>
+  </div>
+  
+</div>

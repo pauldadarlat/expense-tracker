@@ -1,0 +1,14 @@
+.flex-space-between{
+  display: flex;
+  justify-content: space-between;
+}
+
+.custom-btn {
+    cursor: pointer;
+    background-color: lightgrey;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    margin-right: 20px;
+    margin-left: 20px;
+}
+  

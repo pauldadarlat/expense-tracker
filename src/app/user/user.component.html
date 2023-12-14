@@ -1,0 +1,46 @@
+<div *ngIf="user | async as currentUser" class="user-info">
+  <h2>User Information: {{ currentUser.id }}</h2>
+
+  <div class="card card-body">
+    <p class="card-text">Spending Amount: {{ currentUser.spendingAmount }}</p>
+    <div class="form-inline">
+      <div class="form-group mr-2">
+        <label for="newSpendingAmount" class="mr-2"
+          >Change Spending Amount:</label
+        >
+        <input
+          type="number"
+          class="form-control"
+          id="newSpendingAmount"
+          [(ngModel)]="newSpendingAmount"
+        />
+      </div>
+
+      <button class="btn btn-primary" (click)="updateSpendingAmount()">
+        Save
+      </button>
+    </div>
+  </div>
+
+  <div class="past-expenses mt-3">
+    <button class="btn btn-secondary" (click)="showPastExpenses()">
+      Show Past Expenses
+    </button>
+
+    <div *ngIf="showPastExpensesList" class="past-expenses-list mt-3">
+      <ul class="list-group">
+        <li class="list-group-item">Date - Category - Amount spent</li>
+        <li class="list-group-item" *ngFor="let expense of pastExpenses">
+          {{ formatDate(expense.date) }} - {{ expense.category }} -
+          {{ expense.amount }}
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="mt-3">
+    <button (click)="exportToExcel()" class="btn btn-prim'">Export to Excel</button>
+  </div>
+  <div class="mt-3">
+    <button (click)="logout()" class="btn btn-danger">Logout</button>
+  </div>
+</div>

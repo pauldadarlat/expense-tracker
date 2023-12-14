@@ -1,0 +1,16 @@
+<form (ngSubmit)="onSubmit()">
+    <div class="form-group">
+      <label for="category">Category:</label>
+      <select class="form-control" id="category" [(ngModel)]="selectedCategory" name="category" required>
+        <option *ngFor="let category of categories" [value]="category">{{ category }}</option>
+        <option> ceva </option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="amount">Amount:</label>
+      <input type="number" class="form-control" id="amount" [(ngModel)]="amount" name="amount" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Save</button>
+    <button type="button" class="btn btn-secondary" (click)="onCancel()">Cancel</button>
+  </form>
+  

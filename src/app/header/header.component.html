@@ -1,0 +1,13 @@
+<nav class="navbar navbar-expand-sm navbar-light bg-light fixed-top ml-2">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav mr-auto">
+      <li *ngFor="let page of pages" [routerLink]="['/' + page.toLowerCase()]" routerLinkActive="active">
+        <a style="cursor: pointer;" class="nav-link">{{ page }}</a>
+      </li>
+    </ul>
+  </div>
+</nav>

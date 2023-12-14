@@ -1,0 +1,21 @@
+.expense-box {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 25px;
+  }
+  
+  .card-title {
+    margin-bottom: 20px;
+  }
+
+.custom-btn{
+  margin-right: 10px;
+}
+
+  .flex-space-between{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-style:italic;
+  }
