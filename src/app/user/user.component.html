@@ -1,8 +1,8 @@
-<div *ngIf="user | async as currentUser" class="user-info">
-  <h2>User Information: {{ currentUser.id }}</h2>
+<div *ngIf="user" class="user-info">
+  <!-- <h2>User Information: {{ user.id }}</h2> -->
 
   <div class="card card-body">
-    <p class="card-text">Spending Amount: {{ currentUser.spendingAmount }}</p>
+    <p class="card-text">Spending Amount: {{ user.spendingAmount }} Lei</p>
     <div class="form-inline">
       <div class="form-group mr-2">
         <label for="newSpendingAmount" class="mr-2"
@@ -23,16 +23,19 @@
   </div>
 
   <div class="past-expenses mt-3">
-    <button class="btn btn-secondary" (click)="showPastExpenses()">
+    <button class="btn btn-secondary" *ngIf="!showPastExpensesList" (click)="showPastExpenses()">
       Show Past Expenses
+    </button>
+    <button class="btn btn-secondary" *ngIf="showPastExpensesList" (click)="showPastExpenses()">
+      Hide Past Expenses
     </button>
 
     <div *ngIf="showPastExpensesList" class="past-expenses-list mt-3">
       <ul class="list-group">
         <li class="list-group-item">Date - Category - Amount spent</li>
         <li class="list-group-item" *ngFor="let expense of pastExpenses">
-          {{ formatDate(expense.date) }} - {{ expense.category }} -
-          {{ expense.amount }}
+          {{ formatDate(expense.date ) }} - {{ expense.category }} -
+          {{ expense.amount }} Lei
         </li>
       </ul>
     </div>

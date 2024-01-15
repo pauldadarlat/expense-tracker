@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Expense } from '../shared/expense.model';
 import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-summary',
@@ -13,9 +14,12 @@ export class SummaryComponent implements OnInit {
   weeklyTotal: number = 0;
   dailyExpenses: Expense[] = [];
   weeklyExpenses: Expense[] = [];
-  user: User | undefined;
+  user: User = {
+    id: '',
+    pastExpenses: [],
+    spendingAmount: 0,
+  };
   weeklySavings: number = 0;
-
   chartData: any[] = [];
   chartLabels: string[] = [];
   chartOptions: any = {
@@ -28,30 +32,64 @@ export class SummaryComponent implements OnInit {
     },
   ];
   showChart: boolean = false;
-
+  private userSubscription: Subscription = new Subscription();
   constructor(private userService: UserService) {}
 
   ngOnInit(): void {
-    this.user = this.userService.getCurrentUser();
-
-    this.userService.getThisWeekExpenses().subscribe((expenses) => {
-      this.weeklyExpenses = expenses;
-    });
-
-    this.userService.getAmountForCurrentWeek().subscribe((amount) => {
-      this.weeklyTotal = amount;
-      this.calculateWeeklySavings();
+    this.userSubscription = this.userService.getCurrentUser().subscribe((user) => {
+      if (user) {
+        this.user = user;
+        this.userService.getThisWeekExpenses().subscribe((expenses) => {
+          this.weeklyExpenses = expenses.sort((a, b) => {
+            const dateA = new Date(a.date);
+            const dateB = new Date(b.date);
+            return dateA.getTime() - dateB.getTime();
+          });
+        
+          this.weekDays = this.getDaysWithExpenses();
+        });
+        
+        this.userService.getAmountForCurrentWeek().subscribe((amount) => {
+          this.weeklyTotal = amount;
+          this.calculateWeeklySavings();
+        });
+      } else {
+        console.log('User is null.');
+      }
     });
   }
 
-  getDailyExpenses(day: string): Expense[] {
-    return this.weeklyExpenses.filter((expense) => this.formatDate(expense.date) === day.toLowerCase());
+  ngOnDestroy(){
+    this.userSubscription.unsubscribe();
+  }
+
+  getDaysWithExpenses(): string[] {
+    const daysWithExpenses: string[] = [];
+    this.weeklyExpenses.forEach((expense) => {
+      const day = this.formatDate(expense.date);
+      if (!daysWithExpenses.includes(day)) {
+        daysWithExpenses.push(day);
+      }
+    });
+    return daysWithExpenses.sort((a, b) => this.weekDays.indexOf(a) - this.weekDays.indexOf(b));
+  }
+  
+  getExpensesForDay(day: string): Expense[] {
+    return this.weeklyExpenses.filter((expense) => {
+      try {
+        const expenseDate = expense.date;
+        const formattedDate = this.formatDate(expenseDate);
+        return formattedDate.toLowerCase() === day.toLowerCase();
+      } catch (error) {
+        console.error('Error:', error);
+        return false;
+      }
+    });
   }
 
   formatDate(date: Date): string {
-    const day = 'short' as const;
-    const options = { weekday: day };
-    return new Date(date).toLocaleDateString('en-US', options).toLowerCase();
+    const options = { weekday: 'long' as const };
+    return new Intl.DateTimeFormat('en-US', options).format(date);
   }
 
   calculateWeeklySavings(): void {
@@ -62,11 +100,9 @@ export class SummaryComponent implements OnInit {
 
   getChartData(): any[] {
     const eachCategory: { [category: string]: number } = {};
-
     this.weeklyExpenses.forEach((expense: Expense) => {
       const category = expense.category;
       const amount = expense.amount;
-
       if (eachCategory[category]) {
         eachCategory[category] += amount;
       } else {
@@ -78,7 +114,6 @@ export class SummaryComponent implements OnInit {
       category,
       amount: eachCategory[category],
     }));
-
     return chartData || [];
   }
 

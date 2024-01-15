@@ -1,42 +1,69 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { catchError, switchMap } from 'rxjs/operators';
+import { AngularFireAuth } from '@angular/fire/compat/auth';
+import { AngularFirestore } from '@angular/fire/compat/firestore';
+import { Observable, from, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import { User } from '../shared/user.model';
 import { UserService } from '../shared/user.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  constructor(private userService: UserService) {}
+  constructor(
+    private afAuth: AngularFireAuth,
+    private userService: UserService,
+    private firestore: AngularFirestore
+  ) {}
 
-  login(username: string, password: string): Observable<boolean> {
-    return this.userService.getUserById(username).pipe(
-      switchMap((user) => {
-        if (user && user.password === password) {
-          user.isLoggedIn = true;
-          this.userService.setUser(user);
-          return of(true);
-        } else {
-          return of(false);
-        }
+  login(email: string, password: string): Observable<boolean> {
+    return from(this.afAuth.signInWithEmailAndPassword(email, password)).pipe(
+      switchMap((userCredential) => {
+        const user = userCredential.user;
+        const userData: User = {
+          id: user!.uid,
+          pastExpenses: [], 
+          spendingAmount: 0, 
+        };
+
+        this.userService.setUser(userData);
+        return of(true);
       }),
-      catchError((error) => {
-        console.error('Login error:', error);
-        return of(false);
-      })
+      catchError(() => of(false))
     );
   }
 
-  isUserLoggedIn(): boolean {
-    const user = this.userService.getCurrentUser();
-    return !!user && user.isLoggedIn;
+  signup(email: string, password: string): Observable<boolean> {
+    return from(this.afAuth.createUserWithEmailAndPassword(email, password)).pipe(
+      switchMap((userCredential) => {
+        const user = userCredential.user;
+
+        const userData: User = {
+          id: user!.uid,
+          pastExpenses: [],
+          spendingAmount: 0,
+        };
+
+        return from(
+          this.firestore.collection('users').doc(user!.uid).set({
+            id: userData.id,
+            pastExpenses: userData.pastExpenses,
+            spendingAmount: userData.spendingAmount,
+          })
+        ).pipe(
+          map(() => true),
+          catchError(() => of(false))
+        );
+      }),
+      catchError(() => of(false))
+    );
   }
 
-  logout(): void {
-    const user = this.userService.getCurrentUser();
-    if (user) {
-      user.isLoggedIn = false;
-      this.userService.setUser(user);
-    }
+  isUserLoggedIn(): Observable<boolean> {
+    return this.afAuth.authState.pipe(map((user) => !!user));
+  }
+
+  logout(): Observable<void> {
+    return from(this.afAuth.signOut());
   }
 }

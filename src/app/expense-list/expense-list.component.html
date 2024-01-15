@@ -3,10 +3,13 @@
     <h5 class="card-title">Expenses for {{ selectedDay$ | async }}</h5>
     <div *ngIf="expenseList.length > 0; else noExpenses">
       <ul>
-        <li *ngFor="let expense of expenseList" class="expense-box list-unstyled">
+        <li
+          *ngFor="let expense of expenseList"
+          class="expense-box list-unstyled"
+        >
           <div class="flex-space-between">
             {{ formatDate(expense.date) }} - {{ expense.category }} -
-            {{ expense.amount }}
+            {{ expense.amount }} Lei
             <div class="expense-actions">
               <button
                 class="custom-btn btn btn-warning"
@@ -34,16 +37,15 @@
       <button class="btn btn-primary mt-3" (click)="openExpenseItemForm()">
         Add Expense
       </button>
-      <p>Daily Expenses: {{ dailyExpensesTotal$ | async }}</p>
+      <p>Daily Expenses: {{ calculateDailyExpensesTotal() }}</p>
     </div>
     <div class="mt-5">
       <app-expense-item
-      *ngIf="showExpenseItemForm"
+        *ngIf="showExpenseItemForm"
         [expenseItem]="selectedExpense"
         (saveExpenseItem)="onSaveNewExpenseItem($event)"
         (cancel)="closeExpenseItemForm()"
       ></app-expense-item>
     </div>
   </div>
-  
 </div>

@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Params } from '@angular/router';
 import { Expense } from '../shared/expense.model';
 import { UserService } from '../shared/user.service';
-import { Subscription, Observable, map } from 'rxjs';
+import { Subscription, Observable, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-expense-list',
@@ -18,31 +19,38 @@ export class ExpenseListComponent implements OnInit, OnDestroy {
   selectedExpense!: Expense;
   private routeSubscription: Subscription = new Subscription();
   private userSubscription: Subscription = new Subscription();
-  dailyExpensesTotal$: Observable<number> | undefined;
-  isEditing: boolean = false;
-
   constructor(
     private route: ActivatedRoute,
     private userService: UserService
   ) {}
 
   ngOnInit() {
-    this.routeSubscription = this.route.data.subscribe((data) => {
-      const selectedDay = data['day'];
-      if (!this.isValidDay(selectedDay)) {
-        return alert('Invalid day!');
-      }
-      this.dateForDayOfWeek = this.getDateForDayOfWeek(selectedDay);
+    this.userSubscription = this.userService
+      .getCurrentUser()
+      .subscribe((user) => {
+        if (user) {
+          this.routeSubscription = this.route.data
+            .pipe(
+              map((data) => data['day']),
+              switchMap((selectedDay) => {
+                if (!selectedDay || !this.isValidDay(selectedDay)) {
+                  alert('Invalid day!' + selectedDay);
+                  return of(void 0);
+                }
+                this.dateForDayOfWeek = this.getDateForDayOfWeek(selectedDay);
 
-      this.userService
-        .getDailyExpenses(selectedDay)
-        .subscribe((expenses: Expense[]) => (this.expenseList = expenses));
-
-      this.dailyExpensesTotal$ =
-        this.userService.getAmountForCurrentDay(selectedDay);
-    });
-
-    this.selectedDay$ = this.route.data.pipe(map((data) => data['day']));
+                return this.userService.getDailyExpenses(selectedDay);
+              })
+            )
+            .subscribe((expenses: Expense[] | void) => {
+              if (expenses) {
+                this.expenseList = expenses;
+                this.showAddExpenseButton = true;
+              }
+            });
+          this.selectedDay$ = this.route.data.pipe(map((data) => data['day']));
+        }
+      });
   }
 
   ngOnDestroy() {
@@ -55,34 +63,31 @@ export class ExpenseListComponent implements OnInit, OnDestroy {
     return days.includes(day);
   }
 
-  getTotalAmount(): Subscription | undefined {
-    return this.selectedDay$?.subscribe((day) =>
-      this.userService.getAmountForCurrentDay(day)
+  calculateDailyExpensesTotal(): number {
+    return this.expenseList.reduce(
+      (total, expense) => total + expense.amount,
+      0
     );
   }
 
   openExpenseItemForm() {
     this.showExpenseItemForm = true;
     this.showAddExpenseButton = false;
-    this.isEditing = false;
   }
 
   openEditExpense(expense: Expense): void {
     this.selectedExpense = expense;
     this.openExpenseItemForm();
-    this.isEditing = true;
   }
 
   onSaveNewExpenseItem(newExpenseItem: Expense) {
-    if (!this.isEditing) {
+    if (!this.selectedExpense) {
       newExpenseItem.date = this.dateForDayOfWeek;
       this.userService.addExpense(newExpenseItem);
     } else {
-      const index = this.expenseList.indexOf(this.selectedExpense);
-      if (index !== -1) {
-        this.userService.updateExpense(this.selectedExpense.id, newExpenseItem);
-      }
+      this.userService.updateExpense(this.selectedExpense.id, newExpenseItem);
     }
+
     this.closeExpenseItemForm();
   }
 
@@ -99,9 +104,8 @@ export class ExpenseListComponent implements OnInit, OnDestroy {
     const day = '2-digit' as const;
     const month = '2-digit' as const;
     const year = '2-digit' as const;
-
     const options = { day, month, year };
-    return new Date(date).toLocaleDateString('en-US', options);
+    return date.toLocaleDateString('en-US', options);
   }
 
   getDateForDayOfWeek(dayOfWeek: string): Date {

@@ -1,23 +1,25 @@
-<div class="container mbot">
-  <h2>Weekly Summary</h2>
+<div class="container mt-4" style="width: 100%;">
+  <h2 class="mb-4" style="text-align: center;">Weekly Summary</h2>
 
-  <div *ngFor="let day of weekDays" class="mb-2 border rounded">
-    <div class="d-flex align-items-center p-1">
-      <h4 class="text-center">{{ day }}</h4>
-      
-      <div class="p-2">
-        <div *ngFor="let expense of getDailyExpenses(day)" class="d-flex justify-content-around p-2 m-1 border rounded">
-            <span class="custom-margin-right">{{ expense.category }}</span>
-            <span>{{ expense.amount }}</span>
-          
+  <div class="row">
+    <div *ngFor="let day of weekDays" class="col mb-3">
+      <div class="card">
+        <div class="card-header">{{ day }}</div>
+        <div class="card-body">
+          <div *ngFor="let expense of getExpensesForDay(day)" class="expense-item">
+            <span>{{ expense.category }} - {{ expense.amount }} Lei</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
-  <p class="mt-3">Weekly Total: {{ weeklyTotal }}</p>
-  <p class="mt-3">Weekly Savings: {{ weeklySavings }}</p>
-  <app-pie-chart [chartData]="chartData" [chartTitle]="'Expenses'" *ngIf="showChart"></app-pie-chart>
-  <button class="btn btn-primary mt-3" (click)="toggleChartVisibility()">Show/Hide Chart</button>
-  
 
+  <div class="mt-3 d-flex justify-content-between">
+    <p><strong>Weekly Total:</strong> {{ weeklyTotal }} Lei</p>
+    <p><strong>Weekly Savings:</strong> {{ weeklySavings }} Lei</p>
+  </div>
+
+  <button class="btn btn-primary mt-3" *ngIf="!showChart" (click)="toggleChartVisibility()">Show Chart</button>
+  <button class="btn btn-primary mt-3" *ngIf="showChart" (click)="toggleChartVisibility()">Hide Chart</button>
+  <app-pie-chart [chartData]="chartData" [chartTitle]="'Expenses'" *ngIf="showChart"></app-pie-chart>
 </div>

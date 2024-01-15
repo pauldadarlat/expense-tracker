@@ -3,6 +3,8 @@ import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
 import { DxPieChartModule } from 'devextreme-angular';
 import { AppRoutingModule } from './app-routing.module';
+import { AngularFireModule } from '@angular/fire/compat';
+import { AngularFirestoreModule } from '@angular/fire/compat/firestore';
 
 import { AppComponent } from './app.component';
 import { ExpenseListComponent } from './expense-list/expense-list.component';
@@ -16,6 +18,8 @@ import { FooterComponent } from './footer/footer.component';
 import { RouteService } from './shared/route.service';
 import { PieChartComponent } from './shared/pie-chart/pie-chart.component';
 import { ExcelService } from './shared/excel.service';
+import { environment } from 'src/environments/environment';
+import { AngularFireAuthModule } from '@angular/fire/compat/auth';
 
 
 @NgModule({
@@ -35,6 +39,9 @@ import { ExcelService } from './shared/excel.service';
     FormsModule,
     AppRoutingModule,
     DxPieChartModule,
+    AngularFireModule.initializeApp(environment.firebase, 'expense-tracker'),
+    AngularFirestoreModule,
+    AngularFireAuthModule,
     
   ],
   schemas:[ CUSTOM_ELEMENTS_SCHEMA],

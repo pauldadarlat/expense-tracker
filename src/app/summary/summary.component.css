@@ -1,7 +1,10 @@
-.custom-margin-right{
-    margin-right: 20px;
-}
 
-.mbot{
-    margin-bottom: 50px;
-}
+  .expense-item {
+    display: inline-block;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 10px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    white-space: nowrap; 
+  }

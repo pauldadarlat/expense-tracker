@@ -1,17 +1,13 @@
-<div class="container">
-  <div *ngIf="isUserLoggedIn(); else authPage">
-    <app-header></app-header>
-    <div class="container" style="padding-top: 70px; padding-bottom: 70px">
-      <div class="row">
-        <div class="col-ml-12">
-          <router-outlet></router-outlet>
-        </div>
+<div class="container" *ngIf="isUserLoggedIn">
+  <app-header></app-header>
+  <div class="container" style="padding-top: 70px; padding-bottom: 70px">
+    <div class="row">
+      <div class="col-ml-12">
+        <router-outlet></router-outlet>
       </div>
     </div>
-    <app-footer></app-footer>
   </div>
-
-  <ng-template #authPage>
-    <app-auth *ngIf="!isUserLoggedIn()"></app-auth>
-  </ng-template>
+  <app-footer></app-footer>
 </div>
+
+<app-auth *ngIf="!isUserLoggedIn"></app-auth>

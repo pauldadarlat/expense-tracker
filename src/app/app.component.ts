@@ -6,9 +6,14 @@ import { AuthService } from './auth/auth.service';
   templateUrl: './app.component.html',
 })
 export class AppComponent {
+  isUserLoggedIn: boolean = false;
+
   constructor(private authService: AuthService) {}
 
-  isUserLoggedIn(): boolean {
-    return this.authService.isUserLoggedIn();
+  ngOnInit(): void {
+    this.authService.isUserLoggedIn().subscribe((loggedIn: boolean) => {
+      this.isUserLoggedIn = loggedIn;
+      console.log(this.isUserLoggedIn);
+    });
   }
 }

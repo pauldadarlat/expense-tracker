@@ -17,36 +17,40 @@ export class AuthComponent {
 
   onSwitchMode() {
     this.isLoginMode = !this.isLoginMode;
+    this.error = null;
   }
 
   onSubmit(form: NgForm) {
     if (!form.valid) {
       return;
     }
-    const username = form.value.email;
+    const email = form.value.email;
     const password = form.value.password;
 
     this.isLoading = true;
 
-    if (this.isLoginMode) {
-      this.authService.login(username, password).subscribe(
-        (success) => {
-          if (success) {
-            this.router.navigate(['/user']);
-          } else {
-            console.error('Login failed');
-            this.error = 'Authentication failed';
-          }
-          this.isLoading = false;
-        },
-        (error) => {
-          console.error('Login error:', error);
-          this.error = 'Authentication error';
-          this.isLoading = false;
-        }
-      );
+    const authObservable = this.isLoginMode
+      ? this.authService.login(email, password)
+      : this.authService.signup(email, password);
 
-      form.reset();
-    }
+    authObservable.subscribe({
+      next: (success) => {
+        if (success) {
+          this.router.navigate(['/user']);
+        } else {
+          console.error('Authentication failed');
+          this.error = 'Authentication failed';
+        }
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Authentication error:', error);
+        this.error = 'Authentication error';
+        this.isLoading = false;
+      },
+      complete: () => {
+        form.reset();
+      },
+    });
   }
 }

@@ -6,40 +6,23 @@ import { filter } from 'rxjs/operators';
   providedIn: 'root',
 })
 export class RouteService {
+  daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
   currentRoute: string = '';
   previousRoute: string = '';
   nextRoute: string = '';
+
+  private routes = ['user', ...this.daysOfWeek.map(day => day.toLowerCase()), 'summary'];
 
   constructor(private router: Router) {
     this.router.events
       .pipe(filter((event) => event instanceof NavigationEnd))
       .subscribe(() => {
         this.currentRoute = this.getCurrentRoute();
-        const routes = [
-          'user',
-          'mon',
-          'tue',
-          'wed',
-          'thu',
-          'fri',
-          'sat',
-          'sun',
-          'summary',
-        ];
 
-        const currentRouteIndex = routes.indexOf(this.currentRoute);
+        const currentRouteIndex = this.routes.indexOf(this.currentRoute);
 
-        if (currentRouteIndex === 0) {
-          this.previousRoute = '';
-        } else {
-          this.previousRoute = '/' + routes[currentRouteIndex - 1];
-        }
-
-        if (currentRouteIndex === routes.length - 1) {
-          this.nextRoute = '';
-        } else {
-          this.nextRoute = '/' + routes[currentRouteIndex + 1];
-        }
+        this.previousRoute = currentRouteIndex > 0 ? '/' + this.routes[currentRouteIndex - 1] : '';
+        this.nextRoute = currentRouteIndex < this.routes.length - 1 ? '/' + this.routes[currentRouteIndex + 1] : '';
       });
   }
 
